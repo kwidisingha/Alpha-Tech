@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Communication Management System (DCMS)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Main Container Layout -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 transition-all duration-300 z-20">
+            <div>
+                <!-- System Logo / Header -->
+                <div class="p-5 flex items-center justify-between border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-600/30">
+                            <i class="fa-solid me-0 fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-white leading-tight">DCMS Portal</h1>
+                            <p class="text-xs text-slate-400">Rajarata University</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-4 space-y-1.5 text-sm font-medium">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-white bg-brand-600 shadow-sm transition">
+                        <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-calendar-days w-5"></i> Master Calendar
+                    </button>
+                    <button onclick="switchTab('meetings')" id="nav-meetings" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-handshake w-5"></i> Meetings Manager
+                    </button>
+                    <button onclick="switchTab('availability')" id="nav-availability" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-user-clock w-5"></i> Staff Availability
+                    </button>
+                    <button onclick="switchTab('agendas')" id="nav-agendas" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-list-check w-5"></i> Agenda Templates
+                    </button>
+                    <button onclick="switchTab('evaluations')" id="nav-evaluations" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-laptop-code w-5"></i> Project Evaluations
+                    </button>
+                    <button onclick="switchTab('notifications')" id="nav-notifications" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-bell w-5"></i> Notifications
+                    </button>
+                </nav>
+            </div>
+
+            <!-- User Context / Role Switcher -->
+            <div class="p-4 border-t border-slate-800">
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Active RBAC Persona</label>
+                    <select id="role-switcher" onchange="changeRole()" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded p-1.5 focus:outline-none focus:border-brand-500">
+                        <option value="HOD">Dr. K.A.S.H. Kulathilake (HOD)</option>
+                        <option value="Academic">W.N. Kawindya (Academic Staff)</option>
+                        <option value="ManagementAssistant">R.G.T.D. Pushpakumara (Management Asst)</option>
+                        <option value="StudentRep">P.K.C.N. Nonis (Student Rep)</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-100 overflow-y-auto">
+
+            <!-- Top Header Bar -->
+            <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <h2 id="page-title" class="text-xl font-bold text-slate-800">Department Dashboard</h2>
+                    <span class="px-2.5 py-1 text-xs font-semibold bg-brand-50 text-brand-700 rounded-full border border-brand-200" id="db-badge">DB: universitydb</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="openScheduleModal()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm transition">
+                        <i class="fa-solid fa-plus"></i> Schedule Meeting
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Views Container -->
+            <div class="p-6 space-y-6">
+
+                <!-- 1. DASHBOARD VIEW -->
+                <div id="view-dashboard" class="tab-content space-y-6">
+                    <!-- Key Statistics Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Meetings</p>
+                                <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-total">12</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Upcoming</p>
+                                <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-upcoming">5</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Rescheduled Logs</p>
+                                <h3 class="text-2xl font-bold text-amber-600 mt-1" id="stat-rescheduled">3</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pending Alerts</p>
+                                <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="stat-notifications">4</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-bell"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Dashboard Table & Quick Overview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Upcoming Meetings List -->
+                        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-list text-brand-600"></i> Departmental Meetings Queue
+                                </h3>
+                                <button onclick="switchTab('meetings')" class="text-xs font-semibold text-brand-600 hover:text-brand-800">View All</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-slate-50 text-slate-500 font-semibold text-xs uppercase border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-3 px-4">Meeting Details</th>
+                                            <th class="py-3 px-4">Venue</th>
+                                            <th class="py-3 px-4">Schedule</th>
+                                            <th class="py-3 px-4">Type</th>
+                                            <th class="py-3 px-4 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-meetings-tbody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic Content Loaded via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- System Security & RBAC Status Info -->
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> RBAC Security Context
+                            </h3>
+                            <div class="text-xs space-y-3">
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                    <span class="font-semibold text-slate-700 block mb-1">Current User Privileges:</span>
+                                    <p id="rbac-description" class="text-slate-600">Full administrative control. Can view Scrutiny Board meetings, approve schedules, and manage users.</p>
+                                </div>
+                                <div class="bg-blue-50/70 p-3 rounded-lg border border-blue-100 text-blue-800">
+                                    <span class="font-semibold block mb-0.5"><i class="fa-solid fa-lock"></i> Policy Rule 6.4 Active:</span>
+                                    Scrutiny Board (SB) meeting records are strictly restricted from Management Assistant roles.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CALENDAR VIEW -->
+                <div id="view-calendar" class="tab-content space-y-5 hidden">
+                    <!-- Filters Bar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Academic Year</label>
+                                <select id="filter-year" onchange="renderCalendar()" class="bg-slate-50 border border-slate-300 text-xs rounded-lg p-2 font-medium focus:ring-brand-500">
+                                    <option value="ALL">All Academic Years</option>
+                                    <option value="2027/2028" selected>2027/2028</option>
+                                    <option value="2026/2027">2026/2027</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Semester</label>
+                                <select id="filter-semester" onchange="renderCalendar()" class="bg-slate-50 border border-slate-300 text-xs rounded-lg p-2 font-medium focus:ring-brand-500">
+                                    <option value="ALL">All Semesters</option>
+                                    <option value="Semester 1">Semester 1</option>
+                                    <option value="Semester 2">Semester 2</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Meeting Category</label>
+                                <select id="filter-type" onchange="renderCalendar()" class="bg-slate-50 border border-slate-300 text-xs rounded-lg p-2 font-medium focus:ring-brand-500">
+                                    <option value="ALL">All Categories</option>
+                                    <option value="DM">Department Meeting (DM)</option>
+                                    <option value="CD">Curriculum Dev (CD)</option>
+                                    <option value="IT">Industry Talk (IT)</option>
+                                    <option value="SB">Scrutiny Board (SB)</option>
+                                    <option value="AP">Academic Projects (AP)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span class="text-xs text-slate-600 mr-2">Fixed</span>
+                            <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> <span class="text-xs text-slate-600">Adjustable</span>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Grid Grid Mock -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-lg text-slate-800" id="calendar-month-year">October 2026</h3>
+                            <div class="flex gap-2">
+                                <button class="p-2 border border-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-50">Prev</button>
+                                <button class="p-2 border border-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-50">Today</button>
+                                <button class="p-2 border border-slate-200 rounded-lg text-xs font-semibold hover:bg-slate-50">Next</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                            <!-- Dynamically Generated Days -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MEETINGS MANAGER VIEW -->
+                <div id="view-meetings" class="tab-content space-y-5 hidden">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex justify-between items-center flex-wrap gap-4">
+                            <h3 class="font-bold text-slate-800">Master Schedule (MEETING Relation)</h3>
+                            <button onclick="openScheduleModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-3 py-2 rounded-lg">
+                                <i class="fa-solid fa-plus mr-1"></i> Add Meeting
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 font-semibold text-xs uppercase border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-3 px-4">ID</th>
+                                        <th class="py-3 px-4">Type / Title</th>
+                                        <th class="py-3 px-4">Date & Time</th>
+                                        <th class="py-3 px-4">Venue</th>
+                                        <th class="py-3 px-4">Rules</th>
+                                        <th class="py-3 px-4">Status</th>
+                                        <th class="py-3 px-4 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="meetings-list-tbody" class="divide-y divide-slate-100">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. STAFF AVAILABILITY VIEW -->
+                <div id="view-availability" class="tab-content space-y-5 hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Add Availability Slot -->
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                            <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-3">Record Availability Slot</h3>
+                            <form id="form-availability" onsubmit="addAvailability(event)" class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Staff Member</label>
+                                    <select id="avail-staff-id" class="w-full text-xs p-2 bg-slate-50 border border-slate-300 rounded-lg">
+                                        <option value="1">Dr. K.A.S.H. Kulathilake (HOD)</option>
+                                        <option value="2">W.N. Kawindya (Academic Staff)</option>
+                                        <option value="3">R.G.T.D. Pushpakumara (Management Asst)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Date</label>
+                                    <input type="date" id="avail-date" required class="w-full text-xs p-2 bg-slate-50 border border-slate-300 rounded-lg">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Start Time</label>
+                                        <input type="time" id="avail-start" required class="w-full text-xs p-2 bg-slate-50 border border-slate-300 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">End Time</label>
+                                        <input type="time" id="avail-end" required class="w-full text-xs p-2 bg-slate-50 border border-slate-300 rounded-lg">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                                    <select id="avail-status" class="w-full text-xs p-2 bg-slate-50 border border-slate-300 rounded-lg">
+                                        <option value="Available">Available</option>
+                                        <option value="Unavailable">Unavailable</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-2 rounded-lg">Save Availability</button>
+                            </form>
+                        </div>
+
+                        <!-- Availability Log Table -->
+                        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="p-5 border-b border-slate-100">
+                                <h3 class="font-bold text-slate-800">STAFF_AVAILABILITY Records</h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-slate-50 text-slate-500 font-semibold text-xs uppercase border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-3 px-4">Staff Name</th>
+                                            <th class="py-3 px-4">Date</th>
+                                            <th class="py-3 px-4">Time Slot</th>
+                                            <th class="py-3 px-4">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="availability-tbody" class="divide-y divide-slate-100">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. AGENDAS VIEW -->
+                <div id="view-agendas" class="tab-content space-y-5 hidden">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 class="font-bold text-slate-800">Meeting Agenda Items (AGENDA Relation)</h3>
+                                <p class="text-xs text-slate-500">Manage templates and specific agenda items assigned to responsible staff.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="space-y-3">
+                                <label class="block text-xs font-semibold text-slate-600">Select Scheduled Meeting</label>
+                                <select id="agenda-meeting-select" onchange="loadAgendaItems()" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                                    <!-- Dynamic meeting options -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 font-semibold text-xs uppercase border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-3 px-4">Item #</th>
+                                        <th class="py-3 px-4">Title</th>
+                                        <th class="py-3 px-4">Description</th>
+                                        <th class="py-3 px-4">Responsible Staff</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="agenda-tbody" class="divide-y divide-slate-100">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. PROJECT EVALUATIONS VIEW -->
+                <div id="view-evaluations" class="tab-content space-y-5 hidden">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-3">PROJECT_EVALUATION Schedules</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 font-semibold text-xs uppercase border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-3 px-4">Eval ID</th>
+                                        <th class="py-3 px-4">Project Group</th>
+                                        <th class="py-3 px-4">Project Title</th>
+                                        <th class="py-3 px-4">Batch Year</th>
+                                        <th class="py-3 px-4">Assigned Meeting Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="evaluations-tbody" class="divide-y divide-slate-100">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. NOTIFICATIONS VIEW -->
+                <div id="view-notifications" class="tab-content space-y-5 hidden">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-3">System Dispatch Log (NOTIFICATION Table)</h3>
+                        <div class="space-y-3" id="notification-logs">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL 1: Schedule New Meeting -->
+    <div id="modal-schedule" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Schedule Departmental Meeting</h3>
+                <button onclick="closeModal('modal-schedule')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="form-schedule" onsubmit="handleMeetingSchedule(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Meeting Category (Meeting_Type_ID)</label>
+                        <select id="sched-type" onchange="updateFixedBadge()" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                            <option value="DM" data-fixed="false">DM - Department Meeting (Adjustable)</option>
+                            <option value="CD" data-fixed="false">CD - Curriculum Dev (Adjustable)</option>
+                            <option value="IT" data-fixed="false">IT - Industry Talk (Adjustable)</option>
+                            <option value="SB" data-fixed="true">SB - Scrutiny Board (Fixed Rule)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Venue (Venue_ID)</label>
+                        <select id="sched-venue" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                            <option value="1">Main Hall (Capacity: 200)</option>
+                            <option value="2">Lab 01 (Capacity: 40)</option>
+                            <option value="3">Boardroom (Capacity: 20)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Meeting Date</label>
+                        <input type="date" id="sched-date" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Start Time</label>
+                        <input type="time" id="sched-start" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">End Time</label>
+                        <input type="time" id="sched-end" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Academic Year</label>
+                        <select id="sched-year" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                            <option value="2027/2028">2027/2028</option>
+                            <option value="2026/2027">2026/2027</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Semester</label>
+                        <select id="sched-semester" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                            <option value="Semester 1">Semester 1</option>
+                            <option value="Semester 2">Semester 2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- External Participants Sections -->
+                <div class="border-t border-slate-100 pt-3 space-y-2">
+                    <span class="text-xs font-bold text-slate-700 block">External Participants Attachment</span>
+                    <div class="flex gap-4 text-xs">
+                        <label class="flex items-center gap-1.5"><input type="checkbox" id="sched-student-rep" class="rounded text-brand-600"> Attach Student Representatives</label>
+                        <label class="flex items-center gap-1.5"><input type="checkbox" id="sched-industry-person" class="rounded text-brand-600"> Attach Industry Persons</label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 border-t border-slate-100 pt-3">
+                    <button type="button" onclick="closeModal('modal-schedule')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white rounded-lg">Schedule Meeting</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Reschedule Meeting -->
+    <div id="modal-reschedule" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-lg text-slate-800">Reschedule Meeting</h3>
+                <button onclick="closeModal('modal-reschedule')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="form-reschedule" onsubmit="handleRescheduleSubmit(event)" class="space-y-4">
+                <input type="hidden" id="resched-meeting-id">
+
+                <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-xs text-amber-800">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Rescheduling will write a formal record into the <strong>RESCHEDULE_HISTORY</strong> table using an atomic SQL transaction.
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">New Date</label>
+                    <input type="date" id="resched-date" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">New Start Time</label>
+                        <input type="time" id="resched-start" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">New End Time</label>
+                        <input type="time" id="resched-end" required class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Reason for Rescheduling</label>
+                    <textarea id="resched-reason" required rows="3" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg" placeholder="e.g. Venue conflict, Lecturer request..."></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 border-t border-slate-100 pt-3">
+                    <button type="button" onclick="closeModal('modal-reschedule')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-lg">Confirm Reschedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: View Reschedule History -->
+    <div id="modal-history" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-xl w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-lg text-slate-800">RESCHEDULE_HISTORY Logs</h3>
+                <button onclick="closeModal('modal-history')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="overflow-y-auto max-h-80 space-y-3" id="history-logs-container">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="flex justify-end border-t border-slate-100 pt-3">
+                <button onclick="closeModal('modal-history')" class="px-4 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data State simulating database state from report
+        const state = {
+            currentRole: 'HOD',
+            venues: [
+                { id: 1, name: 'Main Hall', location: 'Admin Building', capacity: 200 },
+                { id: 2, name: 'Lab 01', location: 'Computing Block', capacity: 40 },
+                { id: 3, name: 'Boardroom', location: 'Faculty Office', capacity: 20 }
+            ],
+            meetings: [
+                { id: 101, type: 'DM', name: 'Departmental Monthly Meeting', date: '2026-10-28', start: '09:00', end: '11:00', venueId: 3, year: '2027/2028', semester: 'Semester 1', status: 'Scheduled', isFixed: false },
+                { id: 102, type: 'SB', name: 'Scrutiny Board Meeting', date: '2026-10-30', start: '13:00', end: '15:00', venueId: 1, year: '2027/2028', semester: 'Semester 1', status: 'Scheduled', isFixed: true },
+                { id: 103, type: 'IT', name: 'Industry Representative Seminar', date: '2026-11-05', start: '10:00', end: '12:00', venueId: 1, year: '2027/2028', semester: 'Semester 1', status: 'Rescheduled', isFixed: false },
+                { id: 104, type: 'AP', name: 'Final Year Project Evaluation', date: '2026-11-12', start: '09:00', end: '16:00', venueId: 2, year: '2027/2028', semester: 'Semester 1', status: 'Scheduled', isFixed: false }
+            ],
+            rescheduleHistory: [
+                { historyId: 1, meetingId: 103, oldDate: '2026-11-02', oldTime: '10:00', newDate: '2026-11-05', newTime: '10:00', reason: 'Industry Partner requested date shift', changedBy: 'Dr. K.A.S.H. Kulathilake', date: '2026-10-20 14:30' }
+            ],
+            availability: [
+                { id: 1, staffName: 'Dr. K.A.S.H. Kulathilake', date: '2026-10-28', start: '08:00', end: '17:00', status: 'Available' },
+                { id: 2, staffName: 'W.N. Kawindya', date: '2026-10-28', start: '10:00', end: '12:00', status: 'Unavailable' }
+            ],
+            agendas: [
+                { id: 1, meetingId: 101, itemNo: 1, title: 'Review of Previous Minutes', desc: 'Confirm actions from September meeting', staff: 'W.N. Kawindya' },
+                { id: 2, meetingId: 101, itemNo: 2, title: 'Curriculum Revision', desc: 'Discuss new CS elective courses', staff: 'Dr. K.A.S.H. Kulathilake' },
+                { id: 3, meetingId: 102, itemNo: 1, title: 'Exam Paper Moderation', desc: 'Final review of end-semester papers', staff: 'Dr. K.A.S.H. Kulathilake' }
+            ],
+            projectEvaluations: [
+                { evalId: 1, groupName: 'Group Alpha', title: 'DCMS Database Platform', batch: '2023/2024', meetingId: 104 }
+            ],
+            notifications: [
+                { id: 1, meetingId: 101, type: 'Creation', date: '2026-10-25 10:00', text: 'New meeting scheduled: Departmental Monthly Meeting' },
+                { id: 2, meetingId: 103, type: 'Reschedule', date: '2026-10-20 14:30', text: 'Meeting #103 rescheduled to 2026-11-05' }
+            ]
+        };
+
+        // UI Tab Switcher Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-brand-600', 'text-white');
+                el.classList.add('hover:bg-slate-800', 'hover:text-white');
+            });
+
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            const navBtn = document.getElementById(`nav-${tabId}`);
+            if(navBtn) {
+                navBtn.classList.add('bg-brand-600', 'text-white');
+            }
+
+            // Set Page Title
+            const titles = {
+                dashboard: 'Department Dashboard',
+                calendar: 'Academic Master Calendar',
+                meetings: 'Meetings Management (MEETING)',
+                availability: 'Staff Availability Matrix',
+                agendas: 'Agenda Template & Builder',
+                evaluations: 'Project Group Evaluations',
+                notifications: 'Notification Dispatch Log'
+            };
+            document.getElementById('page-title').innerText = titles[tabId] || 'DCMS System';
+
+            // Refresh view data
+            renderAllViews();
+        }
+
+        // Change Role & Trigger Policy Rules
+        function changeRole() {
+            state.currentRole = document.getElementById('role-switcher').value;
+            const rbacDesc = document.getElementById('rbac-description');
+            
+            if(state.currentRole === 'HOD') {
+                rbacDesc.innerText = 'Full administrative control. Access to Scrutiny Board meetings, approval of schedules, and system security.';
+            } else if(state.currentRole === 'Academic') {
+                rbacDesc.innerText = 'Academic Staff access. Can organize meetings, edit agendas, and update availability.';
+            } else if(state.currentRole === 'ManagementAssistant') {
+                rbacDesc.innerText = 'Management Assistant access. Restricted from viewing Scrutiny Board (SB) meetings per privacy design.';
+            } else {
+                rbacDesc.innerText = 'Student Representative view. Access limited strictly to assigned public student meetings.';
+            }
+
+            showToast(`Switched RBAC Context to: ${state.currentRole}`, 'info');
+            renderAllViews();
+        }
+
+        // Filter Meetings for Current Role Privacy Guard
+        function getVisibleMeetings() {
+            return state.meetings.filter(m => {
+                if (state.currentRole === 'ManagementAssistant' && m.type === 'SB') {
+                    return false; // Hide Scrutiny Board
+                }
+                if (state.currentRole === 'StudentRep' && m.type !== 'AP' && m.type !== 'IT') {
+                    return false; // Student rep only sees AP or IT
+                }
+                return true;
+            });
+        }
+
+        // Render Dashboard Tables & Elements
+        function renderDashboard() {
+            const tbody = document.getElementById('dashboard-meetings-tbody');
+            tbody.innerHTML = '';
+
+            const visible = getVisibleMeetings();
+            
+            document.getElementById('stat-total').innerText = visible.length;
+            document.getElementById('stat-upcoming').innerText = visible.filter(m => m.status === 'Scheduled').length;
+            document.getElementById('stat-rescheduled').innerText = state.rescheduleHistory.length;
+            document.getElementById('stat-notifications').innerText = state.notifications.length;
+
+            visible.slice(0, 5).forEach(m => {
+                const venue = state.venues.find(v => v.id === m.venueId);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-slate-800 block">${m.name}</span>
+                        <span class="text-xs text-slate-400">ID: #${m.id} | Year: ${m.year}</span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-600">${venue ? venue.name : 'Unassigned'}</td>
+                    <td class="py-3 px-4 text-slate-600">${m.date} <br><span class="text-xs text-slate-400">${m.start} - ${m.end}</span></td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold ${m.isFixed ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${m.type}</span></td>
+                    <td class="py-3 px-4 text-center">${getStatusBadge(m.status)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Calendar Grid
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const visibleMeetings = getVisibleMeetings();
+
+            // Mock grid days for October 2026
+            for (let i = 1; i <= 31; i++) {
+                const dayStr = `2026-10-${i < 10 ? '0' + i : i}`;
+                const dayMeetings = visibleMeetings.filter(m => m.date === dayStr);
+
+                const cell = document.createElement('div');
+                cell.className = 'min-h-[80px] bg-slate-50 rounded-lg border border-slate-200 p-1.5 flex flex-col justify-between';
+                
+                let meetingBadges = '';
+                dayMeetings.forEach(m => {
+                    meetingBadges += `
+                        <div class="text-[10px] font-semibold px-1.5 py-0.5 rounded ${m.isFixed ? 'bg-purple-600 text-white' : 'bg-brand-600 text-white'} truncate mb-1" title="${m.name}">
+                            ${m.start} ${m.type}
+                        </div>
+                    `;
+                });
+
+                cell.innerHTML = `
+                    <span class="text-xs font-bold text-slate-400">${i}</span>
+                    <div>${meetingBadges}</div>
+                `;
+                grid.appendChild(cell);
+            }
+        }
+
+        // Render Master Meetings Table
+        function renderMeetingsTable() {
+            const tbody = document.getElementById('meetings-list-tbody');
+            tbody.innerHTML = '';
+
+            getVisibleMeetings().forEach(m => {
+                const venue = state.venues.find(v => v.id === m.venueId);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono text-xs">#${m.id}</td>
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-slate-800">${m.name}</span>
+                        <span class="block text-xs text-slate-400">${m.type}</span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-600">${m.date}<br><span class="text-xs text-slate-400">${m.start} - ${m.end}</span></td>
+                    <td class="py-3 px-4 text-slate-600">${venue ? venue.name : ''}</td>
+                    <td class="py-3 px-4">${m.isFixed ? '<span class="text-xs text-amber-600 font-semibold"><i class="fa-solid fa-lock"></i> Fixed Rule</span>' : '<span class="text-xs text-emerald-600 font-semibold">Adjustable</span>'}</td>
+                    <td class="py-3 px-4">${getStatusBadge(m.status)}</td>
+                    <td class="py-3 px-4 text-center space-x-2">
+                        <button onclick="openRescheduleModal(${m.id})" class="text-xs bg-amber-50 text-amber-700 hover:bg-amber-100 px-2.5 py-1 rounded font-semibold transition" ${m.isFixed ? 'disabled title="Fixed meeting cannot be rescheduled"' : ''}>
+                            Reschedule
+                        </button>
+                        <button onclick="viewHistory(${m.id})" class="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 px-2 py-1 rounded">History</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Helper Status Badges
+        function getStatusBadge(status) {
+            const map = {
+                Scheduled: 'bg-emerald-100 text-emerald-700',
+                Rescheduled: 'bg-amber-100 text-amber-700',
+                Completed: 'bg-blue-100 text-blue-700',
+                Cancelled: 'bg-rose-100 text-rose-700'
+            };
+            return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${map[status] || 'bg-slate-100'}">${status}</span>`;
+        }
+
+        // Venue Conflict Check Simulator Logic
+        function checkVenueConflict(venueId, date, start, end, excludeId = null) {
+            return state.meetings.some(m => {
+                if (excludeId && m.id === excludeId) return false;
+                if (m.status === 'Cancelled') return false;
+                if (m.venueId === parseInt(venueId) && m.date === date) {
+                    // Overlap logic: Start1 < End2 AND End1 > Start2
+                    return (start < m.end && end > m.start);
+                }
+                return false;
+            });
+        }
+
+        // Schedule Form Handler
+        function handleMeetingSchedule(e) {
+            e.preventDefault();
+            const type = document.getElementById('sched-type').value;
+            const venueId = parseInt(document.getElementById('sched-venue').value);
+            const date = document.getElementById('sched-date').value;
+            const start = document.getElementById('sched-start').value;
+            const end = document.getElementById('sched-end').value;
+            const year = document.getElementById('sched-year').value;
+            const semester = document.getElementById('sched-semester').value;
+
+            // Conflict Guard
+            if (checkVenueConflict(venueId, date, start, end)) {
+                showToast('Venue Conflict Detected! Selected venue is booked during this time slot.', 'error');
+                return;
+            }
+
+            const isFixed = document.getElementById('sched-type').selectedOptions[0].getAttribute('data-fixed') === 'true';
+
+            const newMeeting = {
+                id: 100 + state.meetings.length + 1,
+                type,
+                name: `${type} Meeting`,
+                date,
+                start,
+                end,
+                venueId,
+                year,
+                semester,
+                status: 'Scheduled',
+                isFixed
+            };
+
+            state.meetings.push(newMeeting);
+
+            // Log notification
+            state.notifications.unshift({
+                id: state.notifications.length + 1,
+                meetingId: newMeeting.id,
+                type: 'Creation',
+                date: new Date().toLocaleString(),
+                text: `New meeting #${newMeeting.id} (${type}) scheduled for ${date}`
+            });
+
+            showToast('Meeting scheduled successfully!', 'success');
+            closeModal('modal-schedule');
+            renderAllViews();
+        }
+
+        // Reschedule Handler
+        function openRescheduleModal(id) {
+            const meeting = state.meetings.find(m => m.id === id);
+            if (meeting.isFixed) {
+                showToast('Business Rule Error: Fixed meetings (e.g., Scrutiny Board) cannot be rescheduled!', 'error');
+                return;
+            }
+            document.getElementById('resched-meeting-id').value = id;
+            document.getElementById('modal-reschedule').classList.remove('hidden');
+        }
+
+        function handleRescheduleSubmit(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('resched-meeting-id').value);
+            const meeting = state.meetings.find(m => m.id === id);
+
+            const newDate = document.getElementById('resched-date').value;
+            const newStart = document.getElementById('resched-start').value;
+            const newEnd = document.getElementById('resched-end').value;
+            const reason = document.getElementById('resched-reason').value;
+
+            // Check conflict for new slot
+            if (checkVenueConflict(meeting.venueId, newDate, newStart, newEnd, id)) {
+                showToast('Venue Conflict on new schedule slot!', 'error');
+                return;
+            }
+
+            // Record History Log
+            state.rescheduleHistory.unshift({
+                historyId: state.rescheduleHistory.length + 1,
+                meetingId: id,
+                oldDate: meeting.date,
+                oldTime: meeting.start,
+                newDate,
+                newTime: newStart,
+                reason,
+                changedBy: 'Active User',
+                date: new Date().toLocaleString()
+            });
+
+            // Transactional Update
+            meeting.date = newDate;
+            meeting.start = newStart;
+            meeting.end = newEnd;
+            meeting.status = 'Rescheduled';
+
+            showToast('Meeting rescheduled and logged into RESCHEDULE_HISTORY!', 'success');
+            closeModal('modal-reschedule');
+            renderAllViews();
+        }
+
+        function viewHistory(meetingId) {
+            const container = document.getElementById('history-logs-container');
+            container.innerHTML = '';
+
+            const logs = state.rescheduleHistory.filter(h => h.meetingId === meetingId);
+            if (logs.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">No reschedule logs recorded for this meeting.</p>';
+            } else {
+                logs.forEach(l => {
+                    const card = document.createElement('div');
+                    card.className = 'p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1';
+                    card.innerHTML = `
+                        <div class="flex justify-between font-bold text-slate-700">
+                            <span>Change Log #${l.historyId}</span>
+                            <span class="text-slate-400 font-normal">${l.date}</span>
+                        </div>
+                        <p class="text-slate-600"><strong>Shift:</strong> ${l.oldDate} (${l.oldTime}) &rarr; <span class="text-emerald-700 font-semibold">${l.newDate} (${l.newTime})</span></p>
+                        <p class="text-slate-600"><strong>Reason:</strong> ${l.reason}</p>
+                        <p class="text-slate-400 text-[11px]">Changed by: ${l.changedBy}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            document.getElementById('modal-history').classList.remove('hidden');
+        }
+
+        // Auxiliary Views Rendering
+        function renderAvailability() {
+            const tbody = document.getElementById('availability-tbody');
+            tbody.innerHTML = '';
+            state.availability.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-slate-700">${a.staffName}</td>
+                    <td class="py-3 px-4 text-slate-600">${a.date}</td>
+                    <td class="py-3 px-4 text-slate-600">${a.start} - ${a.end}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${a.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${a.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addAvailability(e) {
+            e.preventDefault();
+            const staffId = document.getElementById('avail-staff-id').value;
+            const staffName = document.getElementById('avail-staff-id').selectedOptions[0].text;
+            const date = document.getElementById('avail-date').value;
+            const start = document.getElementById('avail-start').value;
+            const end = document.getElementById('avail-end').value;
+            const status = document.getElementById('avail-status').value;
+
+            state.availability.unshift({ id: state.availability.length + 1, staffName, date, start, end, status });
+            showToast('Staff availability recorded!', 'success');
+            renderAvailability();
+        }
+
+        function renderAgendas() {
+            const select = document.getElementById('agenda-meeting-select');
+            select.innerHTML = '';
+            state.meetings.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.text = `#${m.id} - ${m.name} (${m.date})`;
+                select.appendChild(opt);
+            });
+            loadAgendaItems();
+        }
+
+        function loadAgendaItems() {
+            const meetingId = parseInt(document.getElementById('agenda-meeting-select').value);
+            const tbody = document.getElementById('agenda-tbody');
+            tbody.innerHTML = '';
+
+            const items = state.agendas.filter(a => a.meetingId === meetingId);
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-xs text-slate-400">No agenda items generated for this meeting.</td></tr>';
+            } else {
+                items.forEach(a => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-bold text-slate-700">${a.itemNo}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">${a.title}</td>
+                        <td class="py-3 px-4 text-slate-600">${a.desc}</td>
+                        <td class="py-3 px-4 text-slate-600">${a.staff}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        function renderEvaluations() {
+            const tbody = document.getElementById('evaluations-tbody');
+            tbody.innerHTML = '';
+            state.projectEvaluations.forEach(e => {
+                const meeting = state.meetings.find(m => m.id === e.meetingId);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono text-xs">#${e.evalId}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${e.groupName}</td>
+                    <td class="py-3 px-4 text-slate-600">${e.title}</td>
+                    <td class="py-3 px-4 text-slate-600">${e.batch}</td>
+                    <td class="py-3 px-4 text-emerald-700 font-semibold">${meeting ? meeting.date : 'Unassigned'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notification-logs');
+            container.innerHTML = '';
+            state.notifications.forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center text-xs';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-800 block">${n.text}</span>
+                        <span class="text-slate-400 text-[11px]">Type: ${n.type} | Meeting ID: #${n.meetingId}</span>
+                    </div>
+                    <span class="text-slate-400 font-mono">${n.date}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderAllViews() {
+            renderDashboard();
+            renderCalendar();
+            renderMeetingsTable();
+            renderAvailability();
+            renderAgendas();
+            renderEvaluations();
+            renderNotifications();
+        }
+
+        // Toast Messages Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-slate-800';
+
+            toast.className = `${bgClass} text-white text-xs font-semibold px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 pointer-events-auto transition duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-info-circle'}"></i> ${message}`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Modal Utilities
+        function openScheduleModal() {
+            document.getElementById('modal-schedule').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Init App on Load
+        window.onload = function() {
+            renderAllViews();
+        };
+    </script>
+</body>
+</html>
